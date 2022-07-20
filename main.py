@@ -1,18 +1,13 @@
-from selenium import webdriver
+import pretty_errors
 import time
-from fake_useragent import UserAgent
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from config import auth_data, ip
 
 
 def get_data():
-
-    ip = ''  # text your proxy ip
-    # url = 'https://www.whatismybrowser.com/detect/what-is-my-user-agent/'
-    url = 'https://www.2ip.ru'
+    url = 'https://vk.com/'
     options = webdriver.ChromeOptions()
-
-    # change user-agent
-    useragent = UserAgent()
-    options.add_argument(f'user-agent={useragent.random}')
 
     # proxy
     options.add_argument(f'--proxy-server={ip}')
@@ -25,7 +20,29 @@ def get_data():
 
     try:
         browser.get(url=url)
-        time.sleep(5)
+        time.sleep(0.5)
+
+        login_button = browser.find_element(by=By.CSS_SELECTOR,
+                                            value='[class="FlatButton FlatButton--primary FlatButton--size-l FlatButton--wide VkIdForm__button VkIdForm__signInButton"]')
+        login_button.click()
+        time.sleep(0.5)
+
+        login_input = browser.find_element(by=By.CSS_SELECTOR, value='[name="login"]')
+        login_input.clear()
+        login_input.send_keys(auth_data['login'])
+        time.sleep(0.5)
+        login_input_button = browser.find_element(by=By.CSS_SELECTOR, value='[class="vkc__Button__container vkc__Button__primary vkc__Button__fluid"]')
+        login_input_button.click()
+        time.sleep(0.5)
+
+        password_input = browser.find_element(by=By.CSS_SELECTOR, value='[name="password"]')
+        password_input.clear()
+        password_input.send_keys(auth_data['password'])
+        time.sleep(0.5)
+        password_input_button = browser.find_element(by=By.CSS_SELECTOR, value='[class="vkc__Button__container vkc__Button__primary vkc__Button__fluid"]')
+        password_input_button.click()
+        time.sleep(0.5)
+
     except Exception as ex:
         print(ex)
     finally:
