@@ -3,11 +3,14 @@ import time
 import pickle
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
 from config import auth_data, ip
 
 
 def get_data():
-    url = 'https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html'
+    url = "https://www.avito.ru/arhangelsk/kvartiry/sdam/na_dlitelnyy_srok-ASgBAgICAkSSA8gQ8AeQUg?context" \
+          "=H4sIAAAAAAAA_0q0MrSqLraysFJKK8rPDUhMT1WyLrYyNLNSKk5NLErOcMsvyg3PTElPLVGyrgUEAAD__xf8iH4tAAAA&f" \
+          "=ASgBAQICAkSSA8gQ8AeQUgFAzAg0kFmOWYxZ "
     options = webdriver.ChromeOptions()
 
     # proxy
@@ -15,6 +18,9 @@ def get_data():
 
     # disable webdriver mode
     options.add_argument("--disable-blink-features=AutomationControlled")
+
+    # headless mode
+    # options.add_argument("--headless")
 
     # browser opening
     browser = webdriver.Chrome(
@@ -24,7 +30,25 @@ def get_data():
 
     try:
         browser.get(url=url)
-        time.sleep(5)
+
+        ads = browser.find_elements(by=By.XPATH, value="//div[@class='iva-item-content-rejJg']")
+
+        data = []
+        for ad in ads:
+            ad.click()
+            browser.switch_to.window(browser.window_handles[1])
+            ad_content = {'url': browser.current_url}
+            price = browser.find_elements(by=By.XPATH, value='//span[@itemprop="price"]')
+            ad_content['price'] = price[1].text
+            user = browser.find_element(by=By.XPATH, value='//div[@data-marker="seller-info/label"]')
+            ad_content['user'] = user.text
+            data.append(ad_content)
+            browser.close()
+            browser.switch_to.window(browser.window_handles[0])
+
+        for el in data:
+            print(el)
+
     except Exception as ex:
         print(ex)
     finally:
