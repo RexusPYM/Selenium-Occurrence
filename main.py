@@ -1,13 +1,21 @@
 import pretty_errors
 import time
+import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from multiprocessing import Pool
+
+urls_list = ["https://www.avito.ru/arhangelsk/kvartiry/sdam/na_dlitelnyy_srok-ASgBAgICAkSSA8gQ8AeQUg?context" 
+             "=H4sIAAAAAAAA_0q0MrSqLraysFJKK8rPDUhMT1WyLrYyNLNSKk5NLErOcMsvyg3PTElPLVGyrgUEAAD__xf8iH4tAAAA&f"
+             "=ASgBAQICAkSSA8gQ8AeQUgFAzAg0kFmOWYxZ ",
+             "https://www.avito.ru/arhangelsk/tovary_dlya_kompyutera/komplektuyuschie/videokarty-ASgBAgICAkTGB"
+             "~pm7gmmZw?cd=1",
+             "https://www.avito.ru/arhangelsk/tovary_dlya_kompyutera/komplektuyuschie/protsessory-ASgBAgICAkTGB"
+             "~pm7gniZw?cd=1"]
 
 
-def get_data():
-    url = "https://www.avito.ru/arhangelsk/kvartiry/sdam/na_dlitelnyy_srok-ASgBAgICAkSSA8gQ8AeQUg?context" \
-          "=H4sIAAAAAAAA_0q0MrSqLraysFJKK8rPDUhMT1WyLrYyNLNSKk5NLErOcMsvyg3PTElPLVGyrgUEAAD__xf8iH4tAAAA&f" \
-          "=ASgBAQICAkSSA8gQ8AeQUgFAzAg0kFmOWYxZ "
+def get_data(url):
+
     options = webdriver.ChromeOptions()
 
     # disable webdriver mode
@@ -23,9 +31,11 @@ def get_data():
     )
 
     try:
+        start_time = datetime.datetime.now()
+
         browser.get(url=url)
         amount_ads = 5
-        ads = browser.find_elements(by=By.XPATH, value="//div[@class='iva-item-content-rejJg']")
+        ads = browser.find_elements(by=By.XPATH, value='//div[@data-marker="item"]')
 
         data = []
         for ad in ads:
@@ -44,6 +54,10 @@ def get_data():
             else:
                 break
 
+        finish_time = datetime.datetime.now()
+        spent_time = finish_time - start_time
+        print(spent_time)
+
         for el in data:
             print(el)
 
@@ -55,8 +69,9 @@ def get_data():
 
 
 def main():
-    get_data()
+    pass
 
 
 if __name__ == '__main__':
-    main()
+    p = Pool(processes=len(urls_list))
+    p.map(get_data, urls_list)
